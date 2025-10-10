@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import DetailFilters from '../components/DetailFilters';
-import ResultsTable from '../components/ResultsTable';
-import DetailModal from '../components/DetailModal';
+import DetailFilters from '../components/detail/DetailFilters';
+import DetailTable from '../components/detail/DetailTable';
+import DetailModal from '../components/detail/DetailModal';
 import { filterRows } from '../utils/filterRows';
 
 function todayISO() {
@@ -181,7 +181,7 @@ export default function DetailTab() {
                 loading={loading}
             />
 
-            <ResultsTable
+            <DetailTable
                 rows={rows}
                 submitted={submitted}
                 loading={loading}

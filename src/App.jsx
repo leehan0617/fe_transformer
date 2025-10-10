@@ -1,5 +1,5 @@
 import React from 'react';
-import TabsShell, { Tab } from './components/TabsShell';
+import TabsShell, { Tab } from './components/common/TabsShell';
 import SummaryTab from "./tabs/SummaryTab.jsx";
 import DetailTab from "./tabs/DetailTab.jsx";
 import './index.css';

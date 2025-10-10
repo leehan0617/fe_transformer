@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import SummaryFilters from '../components/SummaryFilters';
-import SummaryTable from '../components/SummaryTable';
+import SummaryFilters from '../components/summary/SummaryFilters';
+import SummaryTable from '../components/summary/SummaryTable';
 import { filterSummaryRows } from '../utils/summaryFilter';
 
 function todayISO() {
