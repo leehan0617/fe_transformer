@@ -6,9 +6,9 @@ export default function DetailTable({ rows, submitted, loading, onOpenDetail }) 
         { key: 'branch', label: '지사' },
         { key: 'lineName', label: '선로명' },
         { key: 'lineNo', label: '선로번호' },
-        { key: 'compNo', label: '변대주 전산화번호' },
+        { key: 'compNo', label: '변대주 전산화번호', multiline: true }, // multiline 플래그 추가
         { key: 'connectionType', label: '결선방식' },
-        { key: 'ouType', label: '가공지중구분' },
+        { key: 'ouType', label: '설비구분' },
     ];
 
     // Groups (colSpan)
@@ -22,7 +22,7 @@ export default function DetailTable({ rows, submitted, loading, onOpenDetail }) 
     };
 
     const CUST_GROUP = {
-        label: '변압기 고객',
+        label: '변압기 고객(호)',
         cols: [
             { key: 'customer', label: '고객' },     // 현재 데이터 스키마: 텍스트/숫자 혼재 가능
             { key: 'amiBuilt', label: 'AMI 구축' }, // 현재 데이터 스키마: Y/N 또는 숫자
@@ -30,17 +30,17 @@ export default function DetailTable({ rows, submitted, loading, onOpenDetail }) 
     };
 
     const LOAD_GROUP = {
-        label: '변압기 부하',
+        label: '변압기 부하(계약전력)',
         cols: [
-            { key: 'contractPowerAmi',   label: 'AMI 구축 계약전력',   align: 'right' },
-            { key: 'contractPowerNoAmi', label: 'AMI 미구축 계약전력', align: 'right' },
+            { key: 'contractPowerAmi',   label: 'AMI 구축',   align: 'right' },
+            { key: 'contractPowerNoAmi', label: 'AMI 미구축', align: 'right' },
         ],
     };
 
     const SUMUTIL = { key: 'sumUtilPct', label: '변압기 합산이용률', align: 'right' }; // rowSpan=2
 
     const PHASE_UTIL_GROUP = {
-        label: '각 상별 변압기 추정 이용률',
+        label: '각 상별 추정 이용률',
         cols: [
             { key: 'phaseUtilA', label: 'A', align: 'right' },
             { key: 'phaseUtilB', label: 'B', align: 'right' },
@@ -92,7 +92,16 @@ export default function DetailTable({ rows, submitted, loading, onOpenDetail }) 
                         {/* Header row 1 */}
                         <tr>
                             {BASE.map((c) => (
-                                <Th key={`base-top-${c.key}`} rowSpan={2}>{c.label}</Th>
+                                <Th key={`base-top-${c.key}`} rowSpan={2}>
+                                    {c.multiline ? (
+                                        <div className="leading-tight">
+                                            <div>변대주</div>
+                                            <div>전산화번호</div>
+                                        </div>
+                                    ) : (
+                                        c.label
+                                    )}
+                                </Th>
                             ))}
                             <Th colSpan={CAP_GROUP.cols.length} className="text-center">{CAP_GROUP.label}</Th>
                             <Th colSpan={CUST_GROUP.cols.length} className="text-center">{CUST_GROUP.label}</Th>
@@ -141,15 +150,22 @@ export default function DetailTable({ rows, submitted, loading, onOpenDetail }) 
                             </tr>
                         ) : (
                             rows.map((row, i) => (
-                                <tr key={row.id ?? i} className="odd:bg-white even:bg-gray-50">
+                                <tr 
+                                    key={row.id ?? i} 
+                                    className="odd:bg-white even:bg-gray-50 cursor-pointer hover:bg-sky-50 transition-colors"
+                                    onClick={() => onOpenDetail?.(row)}
+                                >
                                     <Td>{fmtText(row.branch)}</Td>
                                     <Td>{fmtText(row.lineName)}</Td>
                                     <Td>{fmtText(row.lineNo)}</Td>
                                     <Td>
                                         <button
                                             type="button"
-                                            onClick={() => onOpenDetail?.(row)}
-                                            className="text-sky-600 hover:underline"
+                                            onClick={(e) => {
+                                                e.stopPropagation();          // 행 클릭 이벤트 막기
+                                                onOpenDetail?.(row);          // 현재 행 전체 데이터를 모달로 전달
+                                            }}
+                                            className="text-sky-600 hover:text-sky-700 underline underline-offset-2"
                                             title="상세 보기"
                                         >
                                             {fmtText(row.compNo)}
@@ -190,14 +206,14 @@ export default function DetailTable({ rows, submitted, loading, onOpenDetail }) 
 
 function Th({ children, className = '', rowSpan, colSpan }) {
     return (
-        <th rowSpan={rowSpan} colSpan={colSpan} className={`px-3 py-2 text-left font-medium ${className}`}>
+        <th rowSpan={rowSpan} colSpan={colSpan} className={`px-3 py-2 text-left font-medium border border-gray-300 ${className}`}>
             {children}
         </th>
     );
 }
 
 function Td({ children, className = '' }) {
-    return <td className={`px-3 py-2 align-middle ${className}`}>{children}</td>;
+    return <td className={`px-3 py-2 align-middle border border-gray-300 ${className}`}>{children}</td>;
 }
 
 function fmtText(v) {

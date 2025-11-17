@@ -13,7 +13,7 @@ import React from 'react';
  *    - 각 입력 간격 확대: 행 gap → md:gap-6, 라벨 하단 여백 mb-2, 섹션 간 space-y-6
  *    - 버튼 영역을 항상 우측 끝 정렬 (justify-end)
  */
-export default function DetailFilters({ state, setState, selects, onSubmit, onReset, loading }) {
+export default function DetailFilters({ state, setState, selects, onSubmit, onReset, loading, onBranchFocus }) {
     const { branchOptions, equipmentOptions, sumUtilOptions } = selects;
     const set = (k) => (e) => setState((prev) => ({ ...prev, [k]: e.target ? e.target.value : e }));
 
@@ -59,22 +59,27 @@ export default function DetailFilters({ state, setState, selects, onSubmit, onRe
                 <div className="grid grid-cols-12 gap-5 md:gap-6 items-end">
                     <div className="col-span-12 md:col-span-2">
                         <label className="text-sm font-medium mb-2 block">지사</label>
-                        <select value={state.branch} onChange={set('branch')} className="h-10 w-full rounded-lg border border-gray-300 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400">
-                            {branchOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                        <select 
+                            value={state.branch} 
+                            onChange={set('branch')} 
+                            onFocus={() => onBranchFocus?.()}
+                            className="h-10 w-full rounded-lg border border-gray-300 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400"
+                        >
+                            {branchOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                         </select>
                     </div>
 
                     <div className="col-span-12 md:col-span-3">
                         <label className="text-sm font-medium mb-2 block">설비구분</label>
                         <select value={state.equipment} onChange={set('equipment')} className="h-10 w-full rounded-lg border border-gray-300 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400">
-                            {equipmentOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                            {equipmentOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                         </select>
                     </div>
 
                     <div className="col-span-12 md:col-span-3">
                         <label className="text-sm font-medium mb-2 block">합산이용률</label>
                         <select value={state.sumUtil} onChange={set('sumUtil')} className="h-10 w-full rounded-lg border border-gray-300 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400">
-                            {sumUtilOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                            {sumUtilOptions.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                         </select>
                     </div>
 
@@ -85,17 +90,17 @@ export default function DetailFilters({ state, setState, selects, onSubmit, onRe
                 <div className="grid grid-cols-12 gap-5 md:gap-6 items-end">
                     <div className="col-span-12 md:col-span-2">
                         <label className="text-sm font-medium mb-2 block">선로명</label>
-                        <input type="text" value={state.lineName} onChange={set('lineName')} className="h-10 w-full rounded-lg border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-sky-400" placeholder="예: 1호선" />
+                        <input type="text" value={state.lineName} onChange={set('lineName')} className="h-10 w-full rounded-lg border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-sky-400" />
                     </div>
 
                     <div className="col-span-12 md:col-span-3">
                         <label className="text-sm font-medium mb-2 block">선로번호</label>
-                        <input type="text" value={state.lineNo} onChange={set('lineNo')} className="h-10 w-full rounded-lg border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-sky-400" placeholder="예: 1001" />
+                        <input type="text" value={state.lineNo} onChange={set('lineNo')} className="h-10 w-full rounded-lg border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-sky-400" />
                     </div>
 
                     <div className="col-span-12 md:col-span-3">
                         <label className="text-sm font-medium mb-2 block">변대주 전산화번호</label>
-                        <input type="text" value={state.compNo} onChange={set('compNo')} className="h-10 w-full rounded-lg border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-sky-400" placeholder="예: CN-0001" />
+                        <input type="text" value={state.compNo} onChange={set('compNo')} className="h-10 w-full rounded-lg border border-gray-300 px-3 focus:outline-none focus:ring-2 focus:ring-sky-400" />
                     </div>
 
                     <div className="col-span-12 md:col-span-4 flex justify-end">

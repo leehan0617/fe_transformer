@@ -51,7 +51,7 @@ export default function SummaryFilters({ state, setState, selects, onSubmit, onR
                         className="h-10 w-full rounded-lg border border-gray-300 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-400"
                     >
                         {equipmentOptions.map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
                 </div>

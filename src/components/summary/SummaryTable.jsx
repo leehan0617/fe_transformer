@@ -3,15 +3,15 @@ import React from 'react';
 /**
  * SummaryTable (지사 PK):
  * - 두번째 탭과 동일한 사이즈: text-sm, px-3 py-2, overflow-x-auto (스케일 축소 제거)
- * - 왼쪽 3컬럼 헤더를 간결화: 지사 / TR수 / 평균(%)
- * - 헤더 = [지사, TR수, 평균(%)] + 그룹헤더 "변압기 최대 이용률 분포" (colspan 12)
+ * - 왼쪽 3컬럼 헤더를 간결화: 지사 / 변압기수 / 평균(%)
+ * - 헤더 = [지사, 변압기수, 평균(%)] + 그룹헤더 "변압기 최대 이용률 분포" (colspan 12)
  * - 하위 12컬럼 = 50%미만, 60%미만, 70%미만, 80%미만, 90%미만, 100%미만, 110%미만, 120%미만, 130%미만, 140%미만, 150%미만, 150%이상
  * - 상단 우측: 기간/건수 + "엑셀(.xlsx) 다운로드" 버튼 (SheetJS xlsx, 병합 헤더 포함)
  */
 export default function SummaryTable({ rows, submitted, loading, periodLabel }) {
     const LEFT_COLS = [
         { key: 'branch', label: '지사', thClass: 'min-w-[6rem]' },
-        { key: 'trCount', label: 'TR수', align: 'right', thClass: 'min-w-[5.5rem]' },
+        { key: 'transformerCount', label: '변압기수', align: 'right', thClass: 'min-w-[5.5rem]' },
         { key: 'avgUtil', label: '평균(%)', align: 'right', thClass: 'min-w-[6rem]' },
     ];
 
@@ -74,14 +74,14 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel }) 
                                 <th
                                     key={`top-${c.key}`}
                                     rowSpan={2}
-                                    className={`px-3 py-2 text-left font-medium ${c.thClass ?? ''} ${
+                                    className={`px-3 py-2 text-left font-medium border border-gray-300 ${c.thClass ?? ''} ${
                                         c.align === 'right' ? 'text-right' : ''
                                     }`}
                                 >
                                     {c.label}
                                 </th>
                             ))}
-                            <th colSpan={DIST_COLS.length} className="px-3 py-2 text-center font-semibold">
+                            <th colSpan={DIST_COLS.length} className="px-3 py-2 text-center font-semibold border border-gray-300">
                                 변압기 최대 이용률 분포
                             </th>
                         </tr>
@@ -91,7 +91,7 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel }) 
                             {DIST_COLS.map((c) => (
                                 <th
                                     key={`sub-${c.key}`}
-                                    className={`px-3 py-2 text-left font-medium ${
+                                    className={`px-3 py-2 text-left font-medium border border-gray-300 ${
                                         c.align === 'right' ? 'text-right' : ''
                                     }`}
                                 >
@@ -104,19 +104,19 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel }) 
                         <tbody>
                         {!submitted ? (
                             <tr>
-                                <td colSpan={LEFT_COLS.length + DIST_COLS.length} className="p-6 text-center text-gray-500">
+                                <td colSpan={LEFT_COLS.length + DIST_COLS.length} className="p-6 text-center text-gray-500 border border-gray-300">
                                     위의 조건을 선택한 후 <span className="font-medium">조회</span>를 눌러 주세요.
                                 </td>
                             </tr>
                         ) : loading ? (
                             <tr>
-                                <td colSpan={LEFT_COLS.length + DIST_COLS.length} className="p-6 text-center text-gray-500">
+                                <td colSpan={LEFT_COLS.length + DIST_COLS.length} className="p-6 text-center text-gray-500 border border-gray-300">
                                     불러오는 중…
                                 </td>
                             </tr>
                         ) : rows.length === 0 ? (
                             <tr>
-                                <td colSpan={LEFT_COLS.length + DIST_COLS.length} className="p-6 text-center text-gray-500">
+                                <td colSpan={LEFT_COLS.length + DIST_COLS.length} className="p-6 text-center text-gray-500 border border-gray-300">
                                     조건에 맞는 결과가 없습니다.
                                 </td>
                             </tr>
@@ -126,7 +126,7 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel }) 
                                     {LEFT_COLS.map((c) => (
                                         <td
                                             key={`cell-left-${c.key}`}
-                                            className={`px-3 py-2 align-middle ${
+                                            className={`px-3 py-2 align-middle border border-gray-300 ${
                                                 c.align === 'right' ? 'text-right tabular-nums' : ''
                                             }`}
                                         >
@@ -136,7 +136,7 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel }) 
                                     {DIST_COLS.map((c) => (
                                         <td
                                             key={`cell-dist-${c.key}`}
-                                            className={`px-3 py-2 align-middle ${
+                                            className={`px-3 py-2 align-middle border border-gray-300 ${
                                                 c.align === 'right' ? 'text-right tabular-nums' : ''
                                             }`}
                                         >
@@ -150,11 +150,11 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel }) 
                         {/* Totals row */}
                         {submitted && !loading && rows.length > 0 && (
                             <tr className="bg-sky-50 text-sky-900 font-semibold border-t border-sky-200">
-                                <td className="px-3 py-2">전체</td>
-                                <td className="px-3 py-2 text-right tabular-nums">{totals.trCount.toLocaleString()}</td>
-                                <td className="px-3 py-2 text-right tabular-nums">{totals.avgUtil.toFixed(2)}</td>
+                                <td className="px-3 py-2 border border-gray-300">전체</td>
+                                <td className="px-3 py-2 text-right tabular-nums border border-gray-300">{totals.transformerCount.toLocaleString()}</td>
+                                <td className="px-3 py-2 text-right tabular-nums border border-gray-300">{totals.avgUtil.toFixed(2)}</td>
                                 {DIST_COLS.map((c) => (
-                                    <td key={`tot-${c.key}`} className="px-3 py-2 text-right tabular-nums">
+                                    <td key={`tot-${c.key}`} className="px-3 py-2 text-right tabular-nums border border-gray-300">
                                         {totals[c.key].toLocaleString()}
                                     </td>
                                 ))}
@@ -170,7 +170,7 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel }) 
 
 function formatCell(key, r) {
     if (key === 'avgUtil') return (Number(r.avgUtil) || 0).toFixed(2);
-    if (key === 'trCount') return (Number(r.trCount) || 0).toLocaleString();
+    if (key === 'transformerCount') return (Number(r.transformerCount) || 0).toLocaleString();
     return r[key] ?? 0;
 }
 
@@ -178,7 +178,7 @@ function computeTotals(rows, LEFT_COLS, DIST_COLS) {
     const n = rows.length || 1;
     const sum = (arr, k) => arr.reduce((acc, x) => acc + (Number(x[k]) || 0), 0);
     const totals = {
-        trCount: sum(rows, 'trCount'),
+        transformerCount: sum(rows, 'transformerCount'),
         avgUtil: rows.reduce((acc, x) => acc + (Number(x.avgUtil) || 0), 0) / n,
     };
     for (const c of DIST_COLS) totals[c.key] = sum(rows, c.key);
@@ -201,14 +201,14 @@ async function exportXLSX(rows, totals, LEFT_COLS, DIST_COLS, periodLabel) {
 
     const body = rows.map((r) => [
         r.branch,
-        Number(r.trCount) || 0,
+        Number(r.transformerCount) || 0,
         round2(r.avgUtil),
         ...DIST_COLS.map((c) => Number(r[c.key]) || 0),
     ]);
 
     const totalRow = [
         '전체',
-        Number(totals.trCount) || 0,
+        Number(totals.transformerCount) || 0,
         round2(totals.avgUtil),
         ...DIST_COLS.map((c) => Number(totals[c.key]) || 0),
     ];
@@ -225,7 +225,7 @@ async function exportXLSX(rows, totals, LEFT_COLS, DIST_COLS, periodLabel) {
 
     ws['!cols'] = [
         { wch: 12 }, // 지사
-        { wch: 8 },  // TR수
+        { wch: 8 },  // 변압기수
         { wch: 10 }, // 평균(%)
         ...DIST_COLS.map(() => ({ wch: 10 })),
     ];

@@ -1,18 +1,16 @@
 import React from 'react';
 import {
-    ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
-    CartesianGrid, Tooltip
+    ResponsiveContainer,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
 } from 'recharts';
 
-/**
- * TrendBarChart
- * - 모달 가로폭을 꽉 채움(ResponsiveContainer)
- * - X축 레이블 자동 간격(minTickGap) + -30° 회전으로 겹침 방지
- * - 여백 최소화(margin.bottom = 28) → 차트/텍스트 사이 불필요한 공백 줄임
- */
-export default function TrendBarChart({ labels = [], values = [], height = 220 }) {
-    const data = labels.map((label, i) => ({ label, value: Number(values[i]) || 0 }));
-
+export default function TrendBarChart({ data = [], height = 220 }) {
     return (
         <div style={{ width: '100%', height }}>
             <ResponsiveContainer>
@@ -21,7 +19,7 @@ export default function TrendBarChart({ labels = [], values = [], height = 220 }
                     <XAxis
                         dataKey="label"
                         tick={{ fontSize: 11, angle: -30 }}
-                        height={30}
+                        height={34}
                         tickLine={false}
                         axisLine={{ stroke: '#e5e7eb' }}
                         interval="preserveStartEnd"
@@ -29,18 +27,24 @@ export default function TrendBarChart({ labels = [], values = [], height = 220 }
                     />
                     <YAxis
                         tick={{ fontSize: 11 }}
-                        width={36}
+                        width={40}
                         axisLine={{ stroke: '#e5e7eb' }}
                         tickLine={false}
                         allowDecimals={false}
                     />
                     <Tooltip
-                        formatter={(v) => [v, '값']}
+                        formatter={(value, name, props) => [`${value}`, name]}
+                        labelFormatter={(label, payload) => {
+                            const total = payload?.[0]?.payload?.usageRate;
+                            return total != null ? `${label} · 합계 ${total}` : label;
+                        }}
                         labelStyle={{ fontSize: 12 }}
                         contentStyle={{ fontSize: 12, borderRadius: 8 }}
                     />
-                    {/* 색상 지정 안 하면 기본 색상 사용 */}
-                    <Bar dataKey="value" />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar dataKey="usageA" stackId="usage" fill="#38bdf8" name="A상" />
+                    <Bar dataKey="usageB" stackId="usage" fill="#60a5fa" name="B상" />
+                    <Bar dataKey="usageC" stackId="usage" fill="#2563eb" name="C상" />
                 </BarChart>
             </ResponsiveContainer>
         </div>

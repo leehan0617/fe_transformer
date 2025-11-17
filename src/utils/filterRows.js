@@ -28,36 +28,34 @@ export function filterRows(DATA, f) {
 
     const matchBranch = (row) => {
         const opt = f.branch;
-        if (!opt || opt === 'Any' || opt === '전체') return true;
-        // '부산본부' → '부산'으로 정규화하여 포함 매칭
-        const normOpt = String(opt).replace(/본부$/, '').trim();
-        return String(row.branch || '').includes(normOpt);
+        if (!opt || opt === 'all') return true;
+        // value가 branch id인 경우, row.branch와 비교
+        // 실제 구현에서는 API에서 받은 branch id와 매칭할 수 있도록 수정 필요
+        return String(row.branch || '').includes(String(opt));
     };
 
     const matchEquipment = (row) => {
         const opt = f.equipment;
-        if (!opt || opt === 'Any' || opt === '전체') return true;
-        // 새 옵션은 '가공/지중' → row.ouType 기준으로 비교 (없으면 row.equipment로 폴백)
+        if (!opt || opt === 'all') return true;
+        // value: 'upper' (가공), 'under' (지중)
         const src = row.ouType ?? row.equipment;
-        return String(src) === String(opt);
+        if (opt === 'upper') return String(src) === '가공';
+        if (opt === 'under') return String(src) === '지중';
+        return false;
     };
 
     const matchSumUtil = (row) => {
         const opt = f.sumUtil;
-        if (!opt || opt === 'Any' || opt === '전체') return true;
+        if (!opt || opt === 'all') return true;
         const v = Number(row.sumUtilPct);
         if (!Number.isFinite(v)) return false;
 
-        if (opt.endsWith('미만')) {
-            const n = parseInt(opt, 10); // '60%미만' → 60
-            return v < n;
-        }
-        if (opt === '150%초과') return v > 150;
-
-        // 예전 형식('>= 80%' 등)도 임시 허용
-        if (opt.startsWith('>=')) {
-            const n = parseInt(opt.replace('>=', ''), 10);
-            return v >= n;
+        // value 형식: '50', '60', ..., '150', '150+'
+        if (opt === '150+') return v > 150;
+        
+        const threshold = parseInt(opt, 10);
+        if (!Number.isNaN(threshold)) {
+            return v < threshold;
         }
         return true;
     };
