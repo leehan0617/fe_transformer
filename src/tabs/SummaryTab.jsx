@@ -1,11 +1,7 @@
-import React, { useMemo, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import apiClient from '../api/client';
 import SummaryFilters from '../components/summary/SummaryFilters';
 import SummaryTable from '../components/summary/SummaryTable';
-import { getSummarySampleRows } from '../mocks/summarySample';
-
-// Dev server에서는 목 데이터 사용, 빌드/프리뷰(프로덕션)에서는 실제 서버 호출
-const USE_SUMMARY_MOCK = import.meta.env.DEV === true;
 const DIST_KEYS = ['b50', 'b60', 'b70', 'b80', 'b90', 'b100', 'b110', 'b120', 'b130', 'b140', 'b150', 'b150p'];
 
 function todayISO() {
@@ -23,8 +19,6 @@ export default function SummaryTab() {
         { label: '가공', value: 'upper' },
         { label: '지중', value: 'under' },
     ];
-
-    const API_ENDPOINT = '/api/summary';
 
     const defaultDate = todayISO();
 
@@ -73,10 +67,10 @@ export default function SummaryTab() {
     }
 
     async function fetchSummary(params) {
-        if (!params && !USE_SUMMARY_MOCK) return;
+        if (!params) return;
         setLoading(true);
         try {
-            const raw = USE_SUMMARY_MOCK ? await getSummarySampleRows({ params }) : (await axios.get(API_ENDPOINT, { params })).data;
+            const raw = (await apiClient.get('/summary', { params })).data;
             // Map API response to SummaryTable expected schema
             const apiRows = Array.isArray(raw) ? raw : [];
             const mapped = apiRows.map((r) => {
@@ -94,7 +88,7 @@ export default function SummaryTab() {
             setRows(mapped);
         } catch (err) {
             if (!USE_SUMMARY_MOCK) {
-                console.error('Failed to fetch /api/summary', err);
+                console.error('Failed to fetch /summary', err);
             }
             setRows([]);
         } finally {

@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import apiClient from '../api/client';
 import DetailFilters from '../components/detail/DetailFilters';
 import DetailTable from '../components/detail/DetailTable';
 import DetailModal from '../components/detail/DetailModal';
-import { getDetailSampleRows, getDepartmentSampleRows } from '../mocks/detailSample';
-
-// Dev server에서는 목 데이터 사용, 빌드/프리뷰(프로덕션)에서는 실제 서버 호출
-const USE_DETAIL_MOCK = import.meta.env.DEV === true;
 
 function todayISO() {
     const d = new Date();
@@ -61,6 +57,10 @@ export default function DetailTab() {
     const [loading, setLoading] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
     const [rows, setRows] = useState([]);
+    const [page, setPage] = useState(0);              // 0-base
+    const [pageSize, setPageSize] = useState(20);
+    const [totalCount, setTotalCount] = useState(0);
+    const [lastParams, setLastParams] = useState(null);
 
     // 지사 목록 API 호출 함수
     const fetchBranches = async () => {
@@ -69,9 +69,7 @@ export default function DetailTab() {
 
         setBranchLoading(true);
         try {
-            const branches = USE_DETAIL_MOCK 
-                ? await getDepartmentSampleRows()
-                : (await axios.get('/department')).data;
+            const branches = (await apiClient.get('/department')).data;
             const branchList = Array.isArray(branches) ? branches : [];
             // API 응답을 옵션 배열로 변환: [{label: '전체', value: 'all'}, {label: '북부산지사', value: ...}, ...]
             const branchOptionsList = [
@@ -81,9 +79,7 @@ export default function DetailTab() {
             setBranchOptions(branchOptionsList);
             setBranchFetched(true);
         } catch (err) {
-            if (!USE_DETAIL_MOCK) {
-                console.error('Failed to fetch departments', err);
-            }
+            console.error('Failed to fetch departments', err);
             // 에러 발생 시 기본값 유지
         } finally {
             setBranchLoading(false);
@@ -169,15 +165,18 @@ export default function DetailTab() {
     }
 
     // 상세 데이터 조회 API 호출
-    const fetchDetail = async (params) => {
-        if (!params && !USE_DETAIL_MOCK) return;
+    const fetchDetail = async ({ params, page: pageArg = page, pageSize: sizeArg = pageSize, resetPage = false } = {}) => {
+        const finalParams = params || lastParams;
+        if (!finalParams) return;
+        const requestPage = resetPage ? 0 : pageArg;
         setLoading(true);
         try {
-            const raw = USE_DETAIL_MOCK 
-                ? await getDetailSampleRows({ params }) 
-                : (await axios.get('/detail', { params })).data;
-            const apiRows = Array.isArray(raw) ? raw : [];
-            
+            const requestParams = { ...finalParams, request_page: requestPage, page_size: sizeArg };
+            const raw = (await apiClient.get('/detail', { params: requestParams })).data;
+
+            const apiRows = Array.isArray(raw?.data) ? raw.data : [];
+            const total = Number(raw?.count) || 0;
+
             // API 응답을 테이블 형식에 맞게 매핑
             const mapped = apiRows.map((r) => ({
                 id: r.id, // 모달에서 사용
@@ -202,11 +201,14 @@ export default function DetailTab() {
             }));
             
             setRows(mapped);
+            setTotalCount(total);
+            setPage(requestPage);
+            setPageSize(sizeArg);
+            setLastParams(finalParams);
         } catch (err) {
-            if (!USE_DETAIL_MOCK) {
-                console.error('Failed to fetch detail', err);
-            }
+            console.error('Failed to fetch detail', err);
             setRows([]);
+            setTotalCount(0);
         } finally {
             setLoading(false);
         }
@@ -216,7 +218,9 @@ export default function DetailTab() {
         e.preventDefault();
         setSubmitted(true);
         const params = computeParams(state);
-        await fetchDetail(params);
+        setLastParams(params);
+        setPage(0);
+        await fetchDetail({ params, page: 0, resetPage: true });
     };
 
     const onReset = () => {
@@ -233,6 +237,9 @@ export default function DetailTab() {
         });
         setSubmitted(false);
         setRows([]);
+        setPage(0);
+        setTotalCount(0);
+        setLastParams(null);
     };
 
     const openDetail = (row) => setSelectedRow(row);
@@ -254,6 +261,11 @@ export default function DetailTab() {
                 rows={rows}
                 submitted={submitted}
                 loading={loading}
+                page={page}
+                pageSize={pageSize}
+                totalCount={totalCount}
+                onPageChange={(nextPage) => fetchDetail({ page: nextPage })}
+                onPageSizeChange={(nextSize) => fetchDetail({ page: 0, pageSize: nextSize, resetPage: true })}
                 onOpenDetail={openDetail}
             />
 

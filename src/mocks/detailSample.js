@@ -1,137 +1,77 @@
-const BASE_SAMPLE = [
-    {
-        id: 1,
-        department_id: 9,
-        department_name: '부산울산본부직할',
-        transformer_id: 1,
-        line_name: '창선간',
-        line_id: '39R1',
-        pole_id: '0190H301',
-        connection_type: '43',
-        line_type: '가공',
-        volume_a: 75,
-        volume_b: 75,
-        volume_c: 75,
-        customer_count: 50,
-        ami_count: 30,
-        ami_voltage_sum: 40,
-        not_ami_voltage_sum: 11,
-        usage_rate: 10,
-        usage_a: 2,
-        usage_b: 3,
-        usage_c: 4,
-    },
-    {
-        id: 2,
-        department_id: 9,
-        department_name: '부산울산본부직할',
-        transformer_id: 2,
-        line_name: '부산간',
-        line_id: '39R2',
-        pole_id: '0190H302',
-        connection_type: '44',
-        line_type: '지중',
-        volume_a: 100,
-        volume_b: 100,
-        volume_c: 100,
-        customer_count: 80,
-        ami_count: 50,
-        ami_voltage_sum: 60,
-        not_ami_voltage_sum: 20,
-        usage_rate: 85,
-        usage_a: 82,
-        usage_b: 86,
-        usage_c: 87,
-    },
-    {
-        id: 3,
-        department_id: 10,
-        department_name: '서울산지사',
-        transformer_id: 3,
-        line_name: '서울간',
-        line_id: '11R1',
-        pole_id: '0101H301',
-        connection_type: '43',
-        line_type: '가공',
-        volume_a: 50,
-        volume_b: 50,
-        volume_c: 50,
-        customer_count: 30,
-        ami_count: 20,
-        ami_voltage_sum: 25,
-        not_ami_voltage_sum: 8,
-        usage_rate: 92,
-        usage_a: 91,
-        usage_b: 93,
-        usage_c: 92,
-    },
-    {
-        id: 4,
-        department_id: 10,
-        department_name: '서울산지사',
-        transformer_id: 4,
-        line_name: '강남간',
-        line_id: '11R2',
-        pole_id: '0101H302',
-        connection_type: '44',
-        line_type: '지중',
-        volume_a: 150,
-        volume_b: 150,
-        volume_c: 150,
-        customer_count: 120,
-        ami_count: 100,
-        ami_voltage_sum: 90,
-        not_ami_voltage_sum: 30,
-        usage_rate: 78,
-        usage_a: 77,
-        usage_b: 79,
-        usage_c: 78,
-    },
-    {
-        id: 5,
-        department_id: 11,
-        department_name: '북부산지사',
-        transformer_id: 5,
-        line_name: '북부산간',
-        line_id: '39R3',
-        pole_id: '0190H303',
-        connection_type: '43',
-        line_type: '가공',
-        volume_a: 75,
-        volume_b: 75,
-        volume_c: 0,
-        customer_count: 45,
-        ami_count: 25,
-        ami_voltage_sum: 35,
-        not_ami_voltage_sum: 12,
-        usage_rate: 95,
-        usage_a: 94,
-        usage_b: 96,
-        usage_c: 95,
-    },
-    {
-        id: 6,
-        department_id: 11,
-        department_name: '북부산지사',
-        transformer_id: 6,
-        line_name: '해운대간',
-        line_id: '39R4',
-        pole_id: '0190H304',
-        connection_type: '44',
-        line_type: '지중',
-        volume_a: 100,
-        volume_b: 100,
-        volume_c: 100,
-        customer_count: 70,
-        ami_count: 45,
-        ami_voltage_sum: 55,
-        not_ami_voltage_sum: 18,
-        usage_rate: 68,
-        usage_a: 67,
-        usage_b: 69,
-        usage_c: 68,
-    },
-];
+// 50개의 샘플 데이터 생성
+const generateSampleData = () => {
+    const departments = [
+        { id: 9, name: '부산울산본부직할' },
+        { id: 10, name: '서울산지사' },
+        { id: 11, name: '북부산지사' },
+        { id: 12, name: '영도지사' },
+    ];
+    
+    const lineNames = [
+        '창선간', '부산간', '서울간', '강남간', '북부산간', '해운대간',
+        '동래간', '서면간', '남포간', '광안간', '송도간', '기장간',
+        '정관간', '장안간', '울산간', '양산간', '김해간', '거제간',
+    ];
+    
+    const lineTypes = ['가공', '지중'];
+    const connectionTypes = ['43', '44'];
+    
+    const samples = [];
+    let id = 1;
+    let transformerId = 1;
+    
+    for (let i = 0; i < 50; i++) {
+        const dept = departments[i % departments.length];
+        const lineName = lineNames[i % lineNames.length];
+        const lineType = lineTypes[i % 2];
+        const connectionType = connectionTypes[i % 2];
+        
+        const baseVolume = [50, 75, 100, 150, 200][i % 5];
+        const volumeA = baseVolume;
+        const volumeB = baseVolume;
+        const volumeC = i % 7 === 0 ? 0 : baseVolume; // 일부는 C상이 0
+        
+        const customerCount = 20 + (i * 3) % 150;
+        const amiCount = Math.floor(customerCount * (0.4 + (i % 5) * 0.1));
+        const amiVoltage = Math.floor(amiCount * (0.8 + (i % 3) * 0.1));
+        const notAmiVoltage = Math.floor((customerCount - amiCount) * (0.3 + (i % 4) * 0.1));
+        
+        const usageRate = 20 + (i * 2) % 160; // 20~180% 범위
+        const usageA = usageRate - 2 + (i % 5);
+        const usageB = usageRate + (i % 3);
+        const usageC = usageRate + 1 + (i % 4);
+        
+        const lineId = `${dept.id === 9 || dept.id === 11 ? '39' : '11'}R${(i % 20) + 1}`;
+        const poleId = `${String(dept.id).padStart(2, '0')}${String((i % 10) + 1).padStart(2, '0')}H${String((i % 100) + 1).padStart(3, '0')}`;
+        
+        samples.push({
+            id: id++,
+            department_id: dept.id,
+            department_name: dept.name,
+            transformer_id: transformerId++,
+            line_name: lineName,
+            line_id: lineId,
+            pole_id: poleId,
+            connection_type: connectionType,
+            line_type: lineType,
+            volume_a: volumeA,
+            volume_b: volumeB,
+            volume_c: volumeC,
+            customer_count: customerCount,
+            ami_count: amiCount,
+            ami_voltage_sum: amiVoltage,
+            not_ami_voltage_sum: notAmiVoltage,
+            usage_rate: usageRate,
+            usage_a: usageA,
+            usage_b: usageB,
+            usage_c: usageC,
+        });
+    }
+    
+    return samples;
+};
+
+const BASE_SAMPLE = generateSampleData();
 
 const cloneRows = () =>
     BASE_SAMPLE.map((row) => ({
@@ -203,8 +143,17 @@ export async function getDetailSampleRows({ params } = {}) {
             }
         }
     }
+
+    // 페이징 적용 (0-base request_page, page_size)
+    const totalCount = filtered.length;
+    const requestPage = Number(params?.request_page ?? 0);
+    const pageSize = Number(params?.page_size ?? totalCount);
+    const safePage = Number.isFinite(requestPage) && requestPage >= 0 ? requestPage : 0;
+    const safeSize = Number.isFinite(pageSize) && pageSize > 0 ? pageSize : totalCount;
+    const start = safePage * safeSize;
+    const data = filtered.slice(start, start + safeSize);
     
-    return filtered;
+    return { data, count: totalCount };
 }
 
 export const DETAIL_SAMPLE_ROWS = cloneRows();

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function DetailTable({ rows, submitted, loading, onOpenDetail }) {
+export default function DetailTable({ rows, submitted, loading, page, pageSize, totalCount, onPageChange, onPageSizeChange, onOpenDetail }) {
     // Base (rowSpan=2)
     const BASE = [
         { key: 'branch', label: '지사' },
@@ -50,6 +50,24 @@ export default function DetailTable({ rows, submitted, loading, onOpenDetail }) 
 
     // 🔹 엑셀 다운로드 가능 조건 & 핸들러
     const canDownload = submitted && !loading && rows && rows.length > 0;
+    const totalPages = pageSize ? Math.ceil(totalCount / pageSize) : 0;
+    const disablePager = !submitted || loading || totalPages <= 1;
+    const currentPageDisplay = totalPages === 0 ? 0 : page + 1;
+    const totalPageDisplay = totalPages || 0;
+
+    const handlePageChange = (next) => {
+        if (disablePager) return;
+        const safeNext = Math.min(Math.max(next, 0), Math.max(totalPages - 1, 0));
+        if (safeNext !== page) {
+            onPageChange?.(safeNext);
+        }
+    };
+
+    const handlePageSizeChange = (e) => {
+        const nextSize = Number(e.target.value);
+        if (!Number.isFinite(nextSize) || nextSize <= 0) return;
+        onPageSizeChange?.(nextSize);
+    };
     const onDownloadXLSX = () =>
         exportXLSX({
             rows,
@@ -65,10 +83,66 @@ export default function DetailTable({ rows, submitted, loading, onOpenDetail }) 
         <section className="mt-6">
             <div className="flex items-end justify-between mb-2">
                 <h2 className="text-lg font-semibold">결과</h2>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     {submitted && !loading && (
-                        <div className="text-sm text-gray-500">{rows.length.toLocaleString()}건</div>
+                        <div className="text-sm text-gray-500">
+                            총 {totalCount.toLocaleString()}건 · {pageSize.toLocaleString()}개/페이지
+                        </div>
                     )}
+                    <div className="flex items-center gap-1 text-sm">
+                        <label className="text-gray-600">페이지당</label>
+                        <select
+                            value={pageSize}
+                            onChange={handlePageSizeChange}
+                            disabled={!submitted || loading}
+                            className="border rounded-md px-2 py-1 text-sm"
+                        >
+                            {[10, 20, 50, 100].map((size) => (
+                                <option key={size} value={size}>{size}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm">
+                        <button
+                            type="button"
+                            className="px-2 py-1 border rounded disabled:opacity-50"
+                            onClick={() => handlePageChange(0)}
+                            disabled={disablePager || page <= 0}
+                            title="첫 페이지"
+                        >
+                            ≪
+                        </button>
+                        <button
+                            type="button"
+                            className="px-2 py-1 border rounded disabled:opacity-50"
+                            onClick={() => handlePageChange(page - 1)}
+                            disabled={disablePager || page <= 0}
+                            title="이전 페이지"
+                        >
+                            ‹
+                        </button>
+                        <div className="px-2 text-gray-700">
+                            {currentPageDisplay} / {totalPageDisplay}
+                        </div>
+                        <button
+                            type="button"
+                            className="px-2 py-1 border rounded disabled:opacity-50"
+                            onClick={() => handlePageChange(page + 1)}
+                            disabled={disablePager || page >= totalPages - 1}
+                            title="다음 페이지"
+                        >
+                            ›
+                        </button>
+                        <button
+                            type="button"
+                            className="px-2 py-1 border rounded disabled:opacity-50"
+                            onClick={() => handlePageChange(totalPages - 1)}
+                            disabled={disablePager || page >= totalPages - 1}
+                            title="마지막 페이지"
+                        >
+                            ≫
+                        </button>
+                    </div>
                     <button
                         type="button"
                         onClick={onDownloadXLSX}

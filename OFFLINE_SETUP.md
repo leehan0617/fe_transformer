@@ -50,7 +50,6 @@ tar -czf offline-react-app.tar.gz \
   src/ \
   public/ \
   *.config.js \
-  *.config.json \
   README.md \
   OFFLINE_SETUP.md
 
