@@ -3,14 +3,14 @@ import apiClient from '../../api/client';
 import Modal from '../common/Modal';
 import TrendBarChart from '../charts/TrendBarChart';
 
-export default function DetailModal({ open, onClose, row, mode = 'day' }) {
+export default function DetailModal({ open, onClose, row, mode = 'day', startDate, endDate }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [chartData, setChartData] = useState([]);
     const [rawList, setRawList] = useState([]);
 
     useEffect(() => {
-        if (!open || !row?.compNo) return;
+        if (!open || !row?.transformerId) return;
 
         let alive = true;
         (async () => {
@@ -20,10 +20,17 @@ export default function DetailModal({ open, onClose, row, mode = 'day' }) {
                 setChartData([]);
                 setRawList([]);
 
-                const poleId = String(row.compNo).trim();
-                if (!poleId) return;
+                const transformerId = String(row.transformerId).trim();
+                if (!transformerId) return;
 
-                const payload = (await apiClient.get(`/detail/${encodeURIComponent(poleId)}`)).data;
+                // 날짜 파라미터 생성
+                const dateParams = buildDateParams(mode, startDate, endDate);
+                const queryString = new URLSearchParams({
+                    transformer_id: transformerId,
+                    ...dateParams,
+                }).toString();
+
+                const payload = (await apiClient.get(`/detail?${queryString}`)).data;
 
                 if (!alive) return;
 
@@ -42,7 +49,7 @@ export default function DetailModal({ open, onClose, row, mode = 'day' }) {
         return () => {
             alive = false;
         };
-    }, [open, row, mode]);
+    }, [open, row, mode, startDate, endDate]);
 
     const title = row ? `상세 보기 · ${row.compNo}` : '상세 보기';
     const metaRows = useMemo(
@@ -152,4 +159,49 @@ function formatCreationLabel(raw, mode) {
 function fmt(n) {
     const v = Number(n);
     return Number.isFinite(v) ? v.toLocaleString() : '-';
+}
+
+// 날짜를 YYYYMMDD 형식으로 변환
+function formatYmd(dateObj) {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    return `${y}${m}${d}`;
+}
+
+// 월의 마지막 일자 구하기
+function lastDayOfMonth(dateObj) {
+    const y = dateObj.getFullYear();
+    const m = dateObj.getMonth();
+    return new Date(y, m + 1, 0);
+}
+
+// 날짜 파라미터 생성
+function buildDateParams(mode, startDate, endDate) {
+    const params = {};
+    
+    if (mode === 'month') {
+        // 월일 경우: 시작일은 선택된 월의 1일, 종료일은 해당 월의 말일
+        if (startDate) {
+            const ym = String(startDate).slice(0, 7); // YYYY-MM
+            const start = new Date(ym + '-01T00:00:00');
+            const end = lastDayOfMonth(start);
+            params.start_date = formatYmd(start);
+            params.end_date = formatYmd(end);
+        }
+    } else {
+        // 일일 경우: 시작일과 종료일은 선택된 일자 그대로
+        if (startDate) {
+            const dstr = String(startDate).length === 7 ? String(startDate) + '-01' : String(startDate);
+            const d = new Date(dstr + 'T00:00:00');
+            params.start_date = formatYmd(d);
+        }
+        if (endDate) {
+            const dstr = String(endDate).length === 7 ? String(endDate) + '-01' : String(endDate);
+            const d = new Date(dstr + 'T00:00:00');
+            params.end_date = formatYmd(d);
+        }
+    }
+    
+    return params;
 }

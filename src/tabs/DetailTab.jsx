@@ -180,7 +180,7 @@ export default function DetailTab() {
             // API 응답을 테이블 형식에 맞게 매핑
             const mapped = apiRows.map((r) => ({
                 id: r.id, // 모달에서 사용
-                transformer_id: r.transformer_id,
+                transformerId: r.transformer_id,
                 branch: r.department_name || '',
                 lineName: r.line_name || '',
                 lineNo: r.line_id || '',
@@ -269,7 +269,14 @@ export default function DetailTab() {
                 onOpenDetail={openDetail}
             />
 
-            <DetailModal open={!!selectedRow} row={selectedRow} onClose={closeDetail} mode={state.mode} />
+            <DetailModal 
+                open={!!selectedRow} 
+                row={selectedRow} 
+                onClose={closeDetail} 
+                mode={state.mode}
+                startDate={state.startDate}
+                endDate={state.endDate}
+            />
         </section>
     );
 }
