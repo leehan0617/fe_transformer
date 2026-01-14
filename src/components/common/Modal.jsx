@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function Modal({ open, onClose, title, children, wide = false }) {
     useEffect(() => {
@@ -9,7 +10,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
 
     if (!open) return null;
 
-    return (
+    const modalContent = (
         <div className="fixed inset-0 z-50">
             {/* overlay */}
             <div className="absolute inset-0 bg-black/40" onClick={onClose} />
@@ -36,4 +37,6 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 }

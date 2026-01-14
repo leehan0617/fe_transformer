@@ -242,7 +242,11 @@ export default function DetailTab() {
         setLastParams(null);
     };
 
-    const openDetail = (row) => setSelectedRow(row);
+    const openDetail = (row) => {
+        if (row) {
+            setSelectedRow(row);
+        }
+    };
     const closeDetail = () => setSelectedRow(null);
 
     return (
