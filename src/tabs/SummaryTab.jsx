@@ -31,7 +31,7 @@ export default function SummaryTab() {
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [rows, setRows] = useState([]);
-    const [detailModal, setDetailModal] = useState({ open: false, branch: '', distKey: '' });
+    const [detailModal, setDetailModal] = useState({ open: false, branch: '', departmentCode: '', distKey: '' });
 
     function formatYmd(dateObj) {
         const y = dateObj.getFullYear();
@@ -78,6 +78,7 @@ export default function SummaryTab() {
             const mapped = apiRows.map((r) => {
                 const out = {
                     branch: r.department ?? '',
+                    departmentCode: r.department_code ?? '',
                     transformerCount: Number(r.transformer_count) || 0,
                     avgUtil: Number(r.transformer_avg) || 0,
                 };
@@ -117,8 +118,8 @@ export default function SummaryTab() {
         setDraft({ mode: 'day', date: defaultDate, equipment: '전체' });
     };
 
-    const onOpenDetailModal = ({ branch, distKey }) => {
-        setDetailModal({ open: true, branch: branch ?? '', distKey: distKey ?? '' });
+    const onOpenDetailModal = ({ branch, departmentCode, distKey }) => {
+        setDetailModal({ open: true, branch: branch ?? '', departmentCode: departmentCode ?? '', distKey: distKey ?? '' });
     };
     const onCloseDetailModal = () => {
         setDetailModal((prev) => ({ ...prev, open: false }));
@@ -140,6 +141,7 @@ export default function SummaryTab() {
                 open={detailModal.open}
                 onClose={onCloseDetailModal}
                 branch={detailModal.branch}
+                departmentCode={detailModal.departmentCode}
                 distKey={detailModal.distKey}
                 applied={detailModal.open ? applied : null}
             />

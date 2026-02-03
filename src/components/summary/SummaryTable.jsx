@@ -150,7 +150,7 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel, on
                                                 className={`px-3 py-2 align-middle border border-gray-300 ${
                                                     c.align === 'right' ? 'text-right tabular-nums' : ''
                                                 } ${isClickable && numValue > 0 ? 'cursor-pointer hover:bg-sky-50 hover:text-sky-700' : ''}`}
-                                                onClick={isClickable && numValue > 0 ? () => onOpenDetailModal({ branch: r.branch, distKey: c.key }) : undefined}
+                                                onClick={isClickable && numValue > 0 ? () => onOpenDetailModal({ branch: r.branch, departmentCode: r.departmentCode, distKey: c.key }) : undefined}
                                                 role={isClickable && numValue > 0 ? 'button' : undefined}
                                                 tabIndex={isClickable && numValue > 0 ? 0 : undefined}
                                             >

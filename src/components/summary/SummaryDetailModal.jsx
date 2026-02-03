@@ -46,7 +46,7 @@ function lastDayOfMonth(dateObj) {
     return new Date(y, m + 1, 0);
 }
 
-function computeDetailParams({ mode, date, equipment }, usageRate) {
+function computeDetailParams({ mode, date, equipment }, usageRate, departmentCode) {
     const params = {};
     if (mode === 'month' && date) {
         const ym = String(date).slice(0, 7);
@@ -63,6 +63,7 @@ function computeDetailParams({ mode, date, equipment }, usageRate) {
     }
     if (equipment && equipment !== 'all') params.line_type = equipment;
     if (usageRate) params.usage_rate = usageRate;
+    if (departmentCode && departmentCode !== 'all') params.department_code = departmentCode;
     return params;
 }
 
@@ -87,7 +88,7 @@ function fmtPct(v) {
     return `${n.toFixed(1)}%`;
 }
 
-export default function SummaryDetailModal({ open, onClose, branch, distKey, applied }) {
+export default function SummaryDetailModal({ open, onClose, branch, departmentCode, distKey, applied }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [rows, setRows] = useState([]);
@@ -120,7 +121,7 @@ export default function SummaryDetailModal({ open, onClose, branch, distKey, app
             setRows([]);
             setTotalCount(0);
             try {
-                const params = computeDetailParams(applied, usageRate);
+                const params = computeDetailParams(applied, usageRate, departmentCode);
                 const requestParams = { ...params, request_page: page, page_size: pageSize };
                 const raw = (await apiClient.get('/detail', { params: requestParams })).data;
 
