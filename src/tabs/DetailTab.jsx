@@ -4,8 +4,9 @@ import DetailFilters from '../components/detail/DetailFilters';
 import DetailTable from '../components/detail/DetailTable';
 import DetailModal from '../components/detail/DetailModal';
 
-function todayISO() {
+function yesterdayISO() {
     const d = new Date();
+    d.setDate(d.getDate() - 1);
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -39,7 +40,7 @@ export default function DetailTab() {
     const [branchLoading, setBranchLoading] = useState(false);
     const [branchFetched, setBranchFetched] = useState(false);
 
-    const defaultDate = todayISO();
+    const defaultDate = yesterdayISO();
 
     const [state, setState] = useState({
         mode: 'day',

@@ -6,8 +6,9 @@ import SummaryDetailModal from '../components/summary/SummaryDetailModal';
 
 const DIST_KEYS = ['b50', 'b60', 'b70', 'b80', 'b90', 'b100', 'b110', 'b120', 'b130', 'b140', 'b150', 'b150p'];
 
-function todayISO() {
+function yesterdayISO() {
     const d = new Date();
+    d.setDate(d.getDate() - 1);
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -22,7 +23,7 @@ export default function SummaryTab() {
         { label: '지중', value: 'under' },
     ];
 
-    const defaultDate = todayISO();
+    const defaultDate = yesterdayISO();
 
     // 폼 입력(draft)과 적용(applied)을 분리 -> 조회 버튼 눌러야만 테이블 갱신
     const [draft, setDraft] = useState({ mode: 'day', date: defaultDate, equipment: 'all' });
