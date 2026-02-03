@@ -63,7 +63,7 @@ function computeDetailParams({ mode, date, equipment }, usageRate, departmentCod
     }
     if (equipment && equipment !== 'all') params.line_type = equipment;
     if (usageRate) params.usage_rate = usageRate;
-    if (departmentCode && departmentCode !== 'all') params.department_code = departmentCode;
+    if (departmentCode) params.department_code = departmentCode;
     return params;
 }
 
@@ -89,6 +89,7 @@ function fmtPct(v) {
 }
 
 export default function SummaryDetailModal({ open, onClose, branch, departmentCode, distKey, applied }) {
+    console.log('[SummaryDetailModal] props:', { branch, departmentCode, distKey, applied });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [rows, setRows] = useState([]);
@@ -123,6 +124,7 @@ export default function SummaryDetailModal({ open, onClose, branch, departmentCo
             try {
                 const params = computeDetailParams(applied, usageRate, departmentCode);
                 const requestParams = { ...params, request_page: page, page_size: pageSize };
+                console.log('[SummaryDetailModal] API 호출 params:', requestParams);
                 const raw = (await apiClient.get('/detail', { params: requestParams })).data;
 
                 if (!alive) return;
@@ -164,7 +166,7 @@ export default function SummaryDetailModal({ open, onClose, branch, departmentCo
         })();
 
         return () => { alive = false; };
-    }, [open, applied, usageRate, page]);
+    }, [open, applied, usageRate, departmentCode, page]);
 
     const totalPages = pageSize ? Math.ceil(totalCount / pageSize) : 0;
     const title = branch ? `${distLabel} 상세 · ${branch}` : `${distLabel} 상세`;

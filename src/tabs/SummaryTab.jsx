@@ -77,9 +77,14 @@ export default function SummaryTab() {
             const raw = (await apiClient.get('/summary', { params })).data;
             const apiRows = Array.isArray(raw) ? raw : [];
             const mapped = apiRows.map((r) => {
+                // API 응답 구조 확인용 (개발 후 제거 가능)
+                if (apiRows.length > 0 && apiRows.indexOf(r) === 0) {
+                    console.log('[SummaryTab] API 응답 샘플:', r);
+                    console.log('[SummaryTab] department_code:', r.department_code, 'department_id:', r.department_id, 'department:', r.department);
+                }
                 const out = {
                     branch: r.department ?? '',
-                    departmentCode: r.department_code ?? '',
+                    departmentCode: r.department_code ?? r.department_id ?? '',
                     transformerCount: Number(r.transformer_count) || 0,
                     avgUtil: Number(r.transformer_avg) || 0,
                 };
@@ -120,6 +125,7 @@ export default function SummaryTab() {
     };
 
     const onOpenDetailModal = ({ branch, departmentCode, distKey }) => {
+        console.log('[SummaryTab] onOpenDetailModal 호출:', { branch, departmentCode, distKey });
         setDetailModal({ open: true, branch: branch ?? '', departmentCode: departmentCode ?? '', distKey: distKey ?? '' });
     };
     const onCloseDetailModal = () => {
