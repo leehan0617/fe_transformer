@@ -61,10 +61,12 @@ npm ci --offline
 npm run build:prod
 
 # 배포 패키지 생성
-tar -czf offline-package.tar.gz dist/ node_modules/ package*.json
+tar -czf offline-package.tar.gz dist/ node_modules/ package*.json .npmrc
 ```
 
 ### 2. 폐쇄망 환경에서 설치
+
+프로젝트에 **`.npmrc`**(`offline=true`)가 포함되어 있어, Windows 폐쇄망에서 **`npm ci`** 만 입력해도 레지스트리 서버를 조회하지 않고 로컬/캐시만 사용합니다.
 
 ```bash
 # Ubuntu
@@ -75,6 +77,7 @@ chmod +x scripts/*.sh
 # Windows
 REM 압축 해제 후
 scripts\setup-windows.bat
+REM 또는 직접: npm ci 후 npm run build
 ```
 
 ## 🔧 주요 스크립트

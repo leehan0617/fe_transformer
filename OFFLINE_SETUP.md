@@ -46,6 +46,7 @@ tar -czf offline-react-app.tar.gz \
   dist/ \
   node_modules/ \
   package*.json \
+  .npmrc \
   scripts/ \
   src/ \
   public/ \
@@ -57,6 +58,8 @@ echo "패키지 크기: $(du -sh offline-react-app.tar.gz | cut -f1)"
 ```
 
 ## 🚀 폐쇄망 환경 설치
+
+프로젝트 루트의 **`.npmrc`** 에 `offline=true` 가 설정되어 있어, 폐쇄망에서 **`npm ci`** 만 실행해도 레지스트리 접속 없이 `package-lock.json`과 로컬 캐시만 사용합니다. (레지스트리 서버 조회로 인한 에러 방지)
 
 ### Ubuntu/Linux 환경
 
@@ -160,6 +163,7 @@ npm run preview -- --port 4174
 
 ### 배포 전 확인사항
 - [ ] `package-lock.json` 파일 포함
+- [ ] `.npmrc` 파일 포함 (폐쇄망에서 `npm ci` 시 레지스트리 미조회)
 - [ ] `node_modules/` 폴더 포함
 - [ ] `dist/` 폴더 포함 (빌드된 결과물)
 - [ ] `scripts/` 폴더 포함

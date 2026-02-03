@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import apiClient from '../api/client';
 import SummaryFilters from '../components/summary/SummaryFilters';
 import SummaryTable from '../components/summary/SummaryTable';
+import SummaryDetailModal from '../components/summary/SummaryDetailModal';
+
 const DIST_KEYS = ['b50', 'b60', 'b70', 'b80', 'b90', 'b100', 'b110', 'b120', 'b130', 'b140', 'b150', 'b150p'];
 
 function todayISO() {
@@ -29,6 +31,7 @@ export default function SummaryTab() {
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [rows, setRows] = useState([]);
+    const [detailModal, setDetailModal] = useState({ open: false, branch: '', distKey: '' });
 
     function formatYmd(dateObj) {
         const y = dateObj.getFullYear();
@@ -71,7 +74,6 @@ export default function SummaryTab() {
         setLoading(true);
         try {
             const raw = (await apiClient.get('/summary', { params })).data;
-            // Map API response to SummaryTable expected schema
             const apiRows = Array.isArray(raw) ? raw : [];
             const mapped = apiRows.map((r) => {
                 const out = {
@@ -87,9 +89,7 @@ export default function SummaryTab() {
             });
             setRows(mapped);
         } catch (err) {
-            if (!USE_SUMMARY_MOCK) {
-                console.error('Failed to fetch /summary', err);
-            }
+            console.error('Failed to fetch /summary', err);
             setRows([]);
         } finally {
             setLoading(false);
@@ -117,12 +117,32 @@ export default function SummaryTab() {
         setDraft({ mode: 'day', date: defaultDate, equipment: '전체' });
     };
 
+    const onOpenDetailModal = ({ branch, distKey }) => {
+        setDetailModal({ open: true, branch: branch ?? '', distKey: distKey ?? '' });
+    };
+    const onCloseDetailModal = () => {
+        setDetailModal((prev) => ({ ...prev, open: false }));
+    };
+
     const periodLabel = applied.date ? (applied.mode === 'month' ? `${applied.date.slice(0, 7)} (월간)` : `${applied.date} (일간)`) : '';
 
     return (
         <section className="w-full">
             <SummaryFilters state={draft} setState={setDraft} selects={{ equipmentOptions }} onSubmit={onSubmit} onReset={onReset} loading={loading} />
-            <SummaryTable rows={rows} submitted={submitted} loading={loading} periodLabel={periodLabel} />
+            <SummaryTable
+                rows={rows}
+                submitted={submitted}
+                loading={loading}
+                periodLabel={periodLabel}
+                onOpenDetailModal={onOpenDetailModal}
+            />
+            <SummaryDetailModal
+                open={detailModal.open}
+                onClose={onCloseDetailModal}
+                branch={detailModal.branch}
+                distKey={detailModal.distKey}
+                applied={detailModal.open ? applied : null}
+            />
         </section>
     );
 }

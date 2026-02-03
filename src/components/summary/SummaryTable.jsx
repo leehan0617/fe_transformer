@@ -8,26 +8,27 @@ import React from 'react';
  * - 하위 12컬럼 = 50%미만, 60%미만, 70%미만, 80%미만, 90%미만, 100%미만, 110%미만, 120%미만, 130%미만, 140%미만, 150%미만, 150%이상
  * - 상단 우측: 기간/건수 + "엑셀(.xlsx) 다운로드" 버튼 (SheetJS xlsx, 병합 헤더 포함)
  */
-export default function SummaryTable({ rows, submitted, loading, periodLabel }) {
+/** 50%미만 ~ 150%이상 분포 컬럼 전체 클릭 가능 (지사/변압기수/평균만 비클릭) */
+const DIST_COLS = [
+    { key: 'b50', label: '50%미만', align: 'right' },
+    { key: 'b60', label: '60%미만', align: 'right' },
+    { key: 'b70', label: '70%미만', align: 'right' },
+    { key: 'b80', label: '80%미만', align: 'right' },
+    { key: 'b90', label: '90%미만', align: 'right' },
+    { key: 'b100', label: '100%미만', align: 'right' },
+    { key: 'b110', label: '110%미만', align: 'right' },
+    { key: 'b120', label: '120%미만', align: 'right' },
+    { key: 'b130', label: '130%미만', align: 'right' },
+    { key: 'b140', label: '140%미만', align: 'right' },
+    { key: 'b150', label: '150%미만', align: 'right' },
+    { key: 'b150p', label: '150%이상', align: 'right' },
+];
+
+export default function SummaryTable({ rows, submitted, loading, periodLabel, onOpenDetailModal }) {
     const LEFT_COLS = [
         { key: 'branch', label: '지사', thClass: 'min-w-[6rem]' },
         { key: 'transformerCount', label: '변압기수', align: 'right', thClass: 'min-w-[5.5rem]' },
         { key: 'avgUtil', label: '평균(%)', align: 'right', thClass: 'min-w-[6rem]' },
-    ];
-
-    const DIST_COLS = [
-        { key: 'b50', label: '50%미만', align: 'right' },
-        { key: 'b60', label: '60%미만', align: 'right' },
-        { key: 'b70', label: '70%미만', align: 'right' },
-        { key: 'b80', label: '80%미만', align: 'right' },
-        { key: 'b90', label: '90%미만', align: 'right' },
-        { key: 'b100', label: '100%미만', align: 'right' },
-        { key: 'b110', label: '110%미만', align: 'right' },
-        { key: 'b120', label: '120%미만', align: 'right' },
-        { key: 'b130', label: '130%미만', align: 'right' },
-        { key: 'b140', label: '140%미만', align: 'right' },
-        { key: 'b150', label: '150%미만', align: 'right' },
-        { key: 'b150p', label: '150%이상', align: 'right' },
     ];
 
     const totals = computeTotals(rows, LEFT_COLS, DIST_COLS);
@@ -139,16 +140,24 @@ export default function SummaryTable({ rows, submitted, loading, periodLabel }) 
                                             {formatCell(c.key, r)}
                                         </td>
                                     ))}
-                                    {DIST_COLS.map((c) => (
-                                        <td
-                                            key={`cell-dist-${c.key}`}
-                                            className={`px-3 py-2 align-middle border border-gray-300 ${
-                                                c.align === 'right' ? 'text-right tabular-nums' : ''
-                                            }`}
-                                        >
-                                            {formatCell(c.key, r)}
-                                        </td>
-                                    ))}
+                                    {DIST_COLS.map((c) => {
+                                        const isClickable = onOpenDetailModal;
+                                        const value = formatCell(c.key, r);
+                                        const numValue = Number(r[c.key]) || 0;
+                                        return (
+                                            <td
+                                                key={`cell-dist-${c.key}`}
+                                                className={`px-3 py-2 align-middle border border-gray-300 ${
+                                                    c.align === 'right' ? 'text-right tabular-nums' : ''
+                                                } ${isClickable && numValue > 0 ? 'cursor-pointer hover:bg-sky-50 hover:text-sky-700' : ''}`}
+                                                onClick={isClickable && numValue > 0 ? () => onOpenDetailModal({ branch: r.branch, distKey: c.key }) : undefined}
+                                                role={isClickable && numValue > 0 ? 'button' : undefined}
+                                                tabIndex={isClickable && numValue > 0 ? 0 : undefined}
+                                            >
+                                                {value}
+                                            </td>
+                                        );
+                                    })}
                                 </tr>
                             ))
                         )}
