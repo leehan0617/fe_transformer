@@ -30,7 +30,7 @@ export default function DetailModal({ open, onClose, row, mode = 'day', startDat
                     ...dateParams,
                 }).toString();
 
-                const payload = (await apiClient.get(`/detail?${queryString}`)).data;
+                const payload = (await apiClient.get(`/detail/modal?${queryString}`)).data;
 
                 if (!alive) return;
 
