@@ -196,6 +196,8 @@ export default function DetailTab() {
                 contractPowerAmi: Number(r.ami_voltage_sum) || 0,
                 contractPowerNoAmi: Number(r.not_ami_voltage_sum) || 0,
                 sumUtilPct: Number(r.usage_rate) || 0,
+                peakTime: r.peak_time || '',
+                peakDemand: Number(r.peak_demand) || 0,
                 phaseUtilA: Number(r.usage_a) || 0,
                 phaseUtilB: Number(r.usage_b) || 0,
                 phaseUtilC: Number(r.usage_c) || 0,

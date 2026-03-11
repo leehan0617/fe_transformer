@@ -38,6 +38,8 @@ export default function DetailTable({ rows, submitted, loading, page, pageSize, 
     };
 
     const SUMUTIL = { key: 'sumUtilPct', label: '변압기 합산이용률', align: 'right' }; // rowSpan=2
+    const PEAK_TIME = { key: 'peakTime', label: '피크시간' }; // rowSpan=2
+    const PEAK_DEMAND = { key: 'peakDemand', label: '피크값', align: 'right' }; // rowSpan=2
 
     const PHASE_UTIL_GROUP = {
         label: '각 상별 추정 이용률',
@@ -76,6 +78,8 @@ export default function DetailTable({ rows, submitted, loading, page, pageSize, 
             CUST_GROUP,
             LOAD_GROUP,
             SUMUTIL,
+            PEAK_TIME,
+            PEAK_DEMAND,
             PHASE_UTIL_GROUP,
         });
 
@@ -181,6 +185,8 @@ export default function DetailTable({ rows, submitted, loading, page, pageSize, 
                             <Th colSpan={CUST_GROUP.cols.length} className="text-center">{CUST_GROUP.label}</Th>
                             <Th colSpan={LOAD_GROUP.cols.length} className="text-center">{LOAD_GROUP.label}</Th>
                             <Th rowSpan={2} className="text-right">{SUMUTIL.label}</Th>
+                            <Th rowSpan={2} className="text-center">{PEAK_TIME.label}</Th>
+                            <Th rowSpan={2} className="text-right">{PEAK_DEMAND.label}</Th>
                             <Th colSpan={PHASE_UTIL_GROUP.cols.length} className="text-center">{PHASE_UTIL_GROUP.label}</Th>
                         </tr>
 
@@ -205,7 +211,7 @@ export default function DetailTable({ rows, submitted, loading, page, pageSize, 
                         {!submitted ? (
                             <tr>
                                 <td colSpan={
-                                    BASE.length + CAP_GROUP.cols.length + CUST_GROUP.cols.length + LOAD_GROUP.cols.length + 1 + PHASE_UTIL_GROUP.cols.length
+                                    BASE.length + CAP_GROUP.cols.length + CUST_GROUP.cols.length + LOAD_GROUP.cols.length + 1 + 2 + PHASE_UTIL_GROUP.cols.length
                                 } className="p-6 text-center text-gray-500">
                                     위의 조건을 선택한 후 <span className="font-medium">조회</span>를 눌러 주세요.
                                 </td>
@@ -213,13 +219,13 @@ export default function DetailTable({ rows, submitted, loading, page, pageSize, 
                         ) : loading ? (
                             <tr>
                                 <td colSpan={
-                                    BASE.length + CAP_GROUP.cols.length + CUST_GROUP.cols.length + LOAD_GROUP.cols.length + 1 + PHASE_UTIL_GROUP.cols.length
+                                    BASE.length + CAP_GROUP.cols.length + CUST_GROUP.cols.length + LOAD_GROUP.cols.length + 1 + 2 + PHASE_UTIL_GROUP.cols.length
                                 } className="p-6 text-center text-gray-500">불러오는 중…</td>
                             </tr>
                         ) : rows.length === 0 ? (
                             <tr>
                                 <td colSpan={
-                                    BASE.length + CAP_GROUP.cols.length + CUST_GROUP.cols.length + LOAD_GROUP.cols.length + 1 + PHASE_UTIL_GROUP.cols.length
+                                    BASE.length + CAP_GROUP.cols.length + CUST_GROUP.cols.length + LOAD_GROUP.cols.length + 1 + 2 + PHASE_UTIL_GROUP.cols.length
                                 } className="p-6 text-center text-gray-500">조건에 맞는 결과가 없습니다.</td>
                             </tr>
                         ) : (
@@ -262,6 +268,10 @@ export default function DetailTable({ rows, submitted, loading, page, pageSize, 
 
                                     {/* 합산이용률 */}
                                     <Td className="text-right tabular-nums">{fmtPct(row.sumUtilPct)}</Td>
+
+                                    {/* 피크 */}
+                                    <Td>{fmtText(row.peakTime)}</Td>
+                                    <Td className="text-right tabular-nums">{fmtNum(row.peakDemand)}</Td>
 
                                     {/* 상별 추정 이용률 */}
                                     <Td className="text-right tabular-nums">{fmtPct(row.phaseUtilA)}</Td>
@@ -313,7 +323,7 @@ function fmtPct(v) {
 }
 
 /* ================= XLSX export ================= */
-async function exportXLSX({ rows, BASE, CAP_GROUP, CUST_GROUP, LOAD_GROUP, SUMUTIL, PHASE_UTIL_GROUP }) {
+async function exportXLSX({ rows, BASE, CAP_GROUP, CUST_GROUP, LOAD_GROUP, SUMUTIL, PEAK_TIME, PEAK_DEMAND, PHASE_UTIL_GROUP }) {
     const XLSX = await import('xlsx');
 
     // 컬럼 순서를 평탄화
@@ -323,6 +333,8 @@ async function exportXLSX({ rows, BASE, CAP_GROUP, CUST_GROUP, LOAD_GROUP, SUMUT
         ...CUST_GROUP.cols.map((c) => c.key),
         ...LOAD_GROUP.cols.map((c) => c.key),
         SUMUTIL.key,
+        PEAK_TIME.key,
+        PEAK_DEMAND.key,
         ...PHASE_UTIL_GROUP.cols.map((c) => c.key),
     ];
 
@@ -333,6 +345,8 @@ async function exportXLSX({ rows, BASE, CAP_GROUP, CUST_GROUP, LOAD_GROUP, SUMUT
         CUST_GROUP.label, '',                    // 2칸 병합
         LOAD_GROUP.label, '',                    // 2칸 병합
         SUMUTIL.label,                           // rowSpan
+        PEAK_TIME.label,                         // rowSpan
+        PEAK_DEMAND.label,                       // rowSpan
         PHASE_UTIL_GROUP.label, '', '',          // 3칸 병합
     ];
 
@@ -342,13 +356,16 @@ async function exportXLSX({ rows, BASE, CAP_GROUP, CUST_GROUP, LOAD_GROUP, SUMUT
         ...CUST_GROUP.cols.map((c) => c.label),
         ...LOAD_GROUP.cols.map((c) => c.label),
         '',                                      // SUMUTIL rowSpan (빈칸)
+        '',                                      // PEAK_TIME rowSpan (빈칸)
+        '',                                      // PEAK_DEMAND rowSpan (빈칸)
         ...PHASE_UTIL_GROUP.cols.map((c) => c.label),
     ];
 
     // Body rows
     const toCell = (r, k) => {
-        const v = r[k];
-        if (['capA','capB','capC','contractPowerAmi','contractPowerNoAmi','sumUtilPct','phaseUtilA','phaseUtilB','phaseUtilC'].includes(k)) {
+        const v = r?.[k];
+
+        if (['capA','capB','capC','contractPowerAmi','contractPowerNoAmi','sumUtilPct','peakDemand','phaseUtilA','phaseUtilB','phaseUtilC'].includes(k)) {
             const n = Number(v);
             return Number.isFinite(n) ? n : '';
         }
@@ -389,8 +406,16 @@ async function exportXLSX({ rows, BASE, CAP_GROUP, CUST_GROUP, LOAD_GROUP, SUMUT
     const sumUtilCol = loadStart + LOAD_GROUP.cols.length;
     merges.push({ s: { r: 0, c: sumUtilCol }, e: { r: 1, c: sumUtilCol } });
 
+    // PEAK_TIME rowSpan
+    const peakTimeCol = sumUtilCol + 1;
+    merges.push({ s: { r: 0, c: peakTimeCol }, e: { r: 1, c: peakTimeCol } });
+
+    // PEAK_DEMAND rowSpan
+    const peakDemandCol = peakTimeCol + 1;
+    merges.push({ s: { r: 0, c: peakDemandCol }, e: { r: 1, c: peakDemandCol } });
+
     // PHASE_UTIL_GROUP colSpan 3
-    const phaseStart = sumUtilCol + 1;
+    const phaseStart = peakDemandCol + 1;
     merges.push({ s: { r: 0, c: phaseStart }, e: { r: 0, c: phaseStart + PHASE_UTIL_GROUP.cols.length - 1 } });
 
     ws['!merges'] = merges;
@@ -407,6 +432,8 @@ async function exportXLSX({ rows, BASE, CAP_GROUP, CUST_GROUP, LOAD_GROUP, SUMUT
         { wch: 10 }, { wch: 10 },             // 고객 / AMI 구축
         { wch: 14 }, { wch: 16 },             // 부하
         { wch: 14 },                          // 합산이용률
+        { wch: 18 },                          // 피크시간
+        { wch: 12 },                          // 피크값
         { wch: 8 }, { wch: 8 }, { wch: 8 },   // 상별 A/B/C
     ];
 
